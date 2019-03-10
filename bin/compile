@@ -34,7 +34,7 @@ if [ -f $JULIA_FILENAME ]; then
   echo "Using cached file" | indent
 else
   echo "Fetching from S3" | indent
-  wget $JULIA_URL
+  wget --quiet $JULIA_URL
 fi
 
 tar xzf $JULIA_FILENAME
