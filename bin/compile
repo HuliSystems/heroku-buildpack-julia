@@ -68,13 +68,11 @@ export JULIA_LOAD_PATH="@:"
 #
 echo "$arrow Verifying installation"
 
-# Exit on error.
-#cmake -version >> /dev/null
-julia -v       >> /dev/null
+# Exit on error / report success.
+julia -v >> /dev/null
+echo $(julia -v) | indent
 
-# Report success.
-#echo $(cmake -version) | indent
-echo $(julia -v)       | indent
+echo $PATH | indent
 
 #=======================================================================
 echo "$arrow Installing packages"
@@ -84,7 +82,5 @@ julia --project -e 'using Pkg; pkg"instantiate"; pkg"precompile"'
 
 # Include compiled modules in build.
 cp -R ~/.julia $BUILD_DIR
-
-# FIXME: Do we need to precompile project modules as well?
 
 # eof
