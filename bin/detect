@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# bin/detect BUILD_DIR
+set -e
+
+BUILD_DIR=$1
+
+# TODO: actually run detection of some kind
+
+echo "Julia" && exit 0
+
+# eof

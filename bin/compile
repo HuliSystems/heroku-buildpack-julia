@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# bin/compile BUILD_DIR CACHE_DIR ENV_DIR
+set -e
+
+# Parameters
+MAJOR_VERSION=1.1
+VERSION=1.1.0
+
+# Args
+BUILD_DIR=$1
+CACHE_DIR=$2
+ENV_DIR=$3
+
+#=======================================================================
+arrow="----->"
+indent() { set -u 's/^/       /' }
+
+#=======================================================================
+# Fetch Julia binary (stored across compiles), extract, and install in
+# build dir.
+JULIA_BASEURL="https://julialang-s3.julialang.org/bin/linux/x64/$(MAJOR_VERSION)"
+JULIA_FILENAME="julia-$(VERSION)-linux-x86_64.tar.gz"
+JULIA_URL="$JULIA_BASEURL/$JULIA_FILENAME"
+JULIA_DIRNAME="julia-$(VERSION)"
+
+echo "$arrow Installing Julia binary"
+
+mkdir -p $CACHE_DIR
+cd $CACHE_DIR
+
+if [ -f $JULIA_FILENAME ]; then
+  echo "Using cached file" | indent
+else
+  echo "Fetching from S3" | indent
+  wget $JULIA_URL
+fi
+
+tar xzf $JULIA_FILENAME
+mv $JULIA_DIR_NAME $BUILD_DIR/julia
+
+cd $BUILD_DIR
+
+#=======================================================================
+# Add freshly installed Julia to paths (build dir will become home dir
+# in running dyno).
+PROFILE_DIR=$BUILD_DIR/.profile.d
+PROFILE=$PROFILE_DIR/julia.sh
+
+echo "$arrow Setting up environment"
+
+mkdir -p $PROFILE_DIR
+
+echo PATH='$HOME/julia/bin:$PATH'                       >> $PROFILE
+echo LIBRARY_PATH='$HOME/julia/lib:$LIBRARY_PATH'       >> $PROFILE
+echo LD_LIBRARY_PATH='$HOME/julia/lib:$LD_LIBRARY_PATH' >> $PROFILE
+echo JULIA_LOAD_PATH='@:$HOME'                          >> $PROFILE
+
+# ... and for when we compile packages later:
+export PATH="./julia/bin:$PATH"
+export LIBRARY_PATH="./julia/lib:$LIBRARY_PATH"
+export LD_LIBRARY_PATH="./julia/lib:$LD_LIBRARY_PATH"
+export JULIA_LOAD_PATH="@:"
+
+#=======================================================================
+# TODO: Do something more sensible here.
+#
+echo "$arrow Verifying installation"
+
+# Exit on error.
+cmake -version >> /dev/null
+julia -v       >> /dev/null
+
+# Report success.
+echo $(cmake -version) | indent
+echo $(julia -v)       | indent
+
+#=======================================================================
+echo "$arrow Installing packages"
+
+# Populate compile user's home dir.
+julia --project -e 'using Pkg; pkg"instantiate"; pkg"precompile"'
+
+# Include compiled modules in build.
+mv ~/.julia $BUILD_DIR
+
+# FIXME: Do we need to precompile project modules as well?
+
+# eof

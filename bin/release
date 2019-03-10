@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# bin/release BUILD_DIR
+set -e
+
+BUILD_DIR=$1
+
+cat << EOF
+---
+EOF
+
+# eof
