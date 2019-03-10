@@ -13,15 +13,17 @@ ENV_DIR=$3
 
 #=======================================================================
 arrow="----->"
-indent() { set -u 's/^/       /' }
+indent() {
+  set -u 's/^/       /'
+}
 
 #=======================================================================
 # Fetch Julia binary (stored across compiles), extract, and install in
 # build dir.
-JULIA_BASEURL="https://julialang-s3.julialang.org/bin/linux/x64/$(MAJOR_VERSION)"
-JULIA_FILENAME="julia-$(VERSION)-linux-x86_64.tar.gz"
+JULIA_BASEURL="https://julialang-s3.julialang.org/bin/linux/x64/$MAJOR_VERSION"
+JULIA_FILENAME="julia-$VERSION-linux-x86_64.tar.gz"
 JULIA_URL="$JULIA_BASEURL/$JULIA_FILENAME"
-JULIA_DIRNAME="julia-$(VERSION)"
+JULIA_DIRNAME="julia-$VERSION"
 
 echo "$arrow Installing Julia binary"
 
@@ -36,7 +38,7 @@ else
 fi
 
 tar xzf $JULIA_FILENAME
-mv $JULIA_DIR_NAME $BUILD_DIR/julia
+mv $JULIA_DIRNAME $BUILD_DIR/julia
 
 cd $BUILD_DIR
 
@@ -67,11 +69,11 @@ export JULIA_LOAD_PATH="@:"
 echo "$arrow Verifying installation"
 
 # Exit on error.
-cmake -version >> /dev/null
+#cmake -version >> /dev/null
 julia -v       >> /dev/null
 
 # Report success.
-echo $(cmake -version) | indent
+#echo $(cmake -version) | indent
 echo $(julia -v)       | indent
 
 #=======================================================================
@@ -81,7 +83,7 @@ echo "$arrow Installing packages"
 julia --project -e 'using Pkg; pkg"instantiate"; pkg"precompile"'
 
 # Include compiled modules in build.
-mv ~/.julia $BUILD_DIR
+cp -R ~/.julia $BUILD_DIR
 
 # FIXME: Do we need to precompile project modules as well?
 
