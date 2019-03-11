@@ -2,14 +2,14 @@
 # bin/compile BUILD_DIR CACHE_DIR ENV_DIR
 set -e
 
-# Parameters
-MAJOR_VERSION=1.1
-VERSION=1.1.0
-
 # Args
 BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
+
+# Parameters
+MAJOR_VERSION=$(cat $ENV_DIR/MAJOR_VERSION)
+VERSION=$(cat $ENV_DIR/VERSION)
 
 #=======================================================================
 arrow="----->"
