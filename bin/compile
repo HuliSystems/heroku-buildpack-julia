@@ -80,6 +80,8 @@ echo "$arrow Installing packages"
 # Populate compile user's home dir.
 #julia --project -e 'using Pkg; pkg"instantiate"; pkg"precompile"'
 
+mkdir -p ~/.julia/config
+
 julia --project -e "using Pkg; pkg\"instantiate\";pkg\"precompile\";
   io = open(\"$HOME/.julia/config/startup.jl\", \"w\");
   packages = Pkg.installed();
