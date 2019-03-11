@@ -78,11 +78,17 @@ echo $PATH | indent
 echo "$arrow Installing packages"
 
 # Populate compile user's home dir.
-#julia --project -e 'using Pkg; pkg"instantiate"; pkg"precompile"'
-
+#
+# FIXME: I want to do
+#   julia --project -e 'using Pkg; pkg"instantiate"; pkg"precompile"'
+# but moving the cache directory changes paths, which makes Julia
+# recompile (at least that's what I think the problem is).
+#
+# So we use this magic incantation, taken from the Optomatica buildpack,
+# instead:
 mkdir -p ~/.julia/config
 
-julia --project -e "using Pkg; pkg\"instantiate\";pkg\"precompile\";
+julia --project -e "using Pkg; pkg\"instantiate\"; pkg\"precompile\";
   io = open(\"$HOME/.julia/config/startup.jl\", \"w\");
   packages = Pkg.installed();
   for package in packages
