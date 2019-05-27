@@ -58,9 +58,9 @@ echo LD_LIBRARY_PATH='$HOME/julia/lib:$LD_LIBRARY_PATH' >> $PROFILE
 echo JULIA_LOAD_PATH='@:$HOME'                          >> $PROFILE
 
 # ... and for when we compile packages later:
-export PATH="./julia/bin:$PATH"
-export LIBRARY_PATH="./julia/lib:$LIBRARY_PATH"
-export LD_LIBRARY_PATH="./julia/lib:$LD_LIBRARY_PATH"
+export PATH="$(pwd)/julia/bin:$PATH"
+export LIBRARY_PATH="$(pwd)/julia/lib:$LIBRARY_PATH"
+export LD_LIBRARY_PATH="$(pwd)/julia/lib:$LD_LIBRARY_PATH"
 export JULIA_LOAD_PATH="@:"
 
 #=======================================================================
