@@ -88,20 +88,33 @@ echo "$arrow Installing packages"
 # instead:
 mkdir -p ~/.julia/config
 
-julia --project -e "using Pkg; pkg\"instantiate\"; pkg\"precompile\";
-  io = open(\"$HOME/.julia/config/startup.jl\", \"w\");
-  packages = Pkg.installed();
-  for package in packages
-    pkgid = Base.identify_package(package[1]);
-    Base.require(pkgid);
-  end
-  for packagemodule in Base.loaded_modules
-    pkgid = packagemodule[1];
-    buildid = Base.module_build_id(packagemodule[2]);
-    uuid = pkgid.uuid == nothing ? \"nothing\" : \"\"\"Base.UUID(\"\$(pkgid.uuid)\")\"\"\";
-    println(io, \"\"\"Base.push!(Base._concrete_dependencies, Base.PkgId(\$uuid, \"\$(pkgid.name)\") => \$buildid)\"\"\");
-  end
-  close(io)"
+instantiate() {
+  julia --project -e "using Pkg; pkg\"instantiate\"; pkg\"precompile\";
+    io       = open(\"$HOME/.julia/config/startup.jl\", \"a\");
+    packages = Pkg.installed();
+    for package in packages
+      pkgid = Base.identify_package(package[1]);
+      Base.require(pkgid);
+    end
+    for packagemodule in Base.loaded_modules
+      pkgid   = packagemodule[1];
+      buildid = Base.module_build_id(packagemodule[2]);
+      uuid    = pkgid.uuid == nothing ? \"nothing\" : \"\"\"Base.UUID(\"\$(pkgid.uuid)\")\"\"\";
+      println(io, \"\"\"Base.push!(Base._concrete_dependencies, Base.PkgId(\$uuid, \"\$(pkgid.name)\") => \$buildid)\"\"\");
+    end
+    close(io)"
+}
+
+# We support standalone packages and monorepos.
+dirs=$(ls | grep \.jl$)
+[ "$dirs" == "" ] && dirs="."
+
+for dir in $dirs; do
+  cur=$(pwd)
+  cd $dir
+  instantiate()
+  cd $cur
+done
 
 # Include compiled modules in build.
 cp -R ~/.julia $BUILD_DIR
